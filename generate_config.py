@@ -87,4 +87,3 @@ if __name__ == '__main__':
     
     # Generate configuration file
     gen_config(AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, MODEL_PREFIX)
-
