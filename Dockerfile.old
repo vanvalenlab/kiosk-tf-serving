@@ -96,9 +96,6 @@ COPY generate_config.py /opt/generate_config.py
 # for debugging purposes
 #COPY ./docker/Dockerfile.devel_gpu /
 
-
-COPY models.conf /opt
-
 COPY tf_serving_startup.sh /
 RUN chmod 755 ./tf_serving_startup.sh
 CMD ["/bin/sh", "-c", "./tf_serving_startup.sh"]

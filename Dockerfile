@@ -42,7 +42,6 @@ COPY --from=build_image /usr/local/bin/tensorflow_model_server /usr/bin/tensorfl
 
 # Including our functions
 COPY generate_config.py /opt/generate_config.py
-COPY models.conf /opt
 COPY tf_serving_startup.sh /
 RUN chmod 755 /tf_serving_startup.sh
 CMD ["/bin/sh", "-c", "/tf_serving_startup.sh"]
