@@ -16,7 +16,7 @@ ARG TF_SERVING_VERSION=1.10.1
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
 
 FROM ${TF_SERVING_BUILD_IMAGE} as build_image
-FROM nvcr.io/vvlab/tensorflow:18.04-py3
+FROM nvcr.io/vvlab/tensorflow:18.08-py3
 #FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 
 ARG TF_SERVING_VERSION_GIT_BRANCH=master
@@ -41,10 +41,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
 COPY --from=build_image /usr/local/bin/tensorflow_model_server /usr/bin/tensorflow_model_server
 
 # Including our functions
-COPY generate_config.py /opt/generate_config.py
-COPY tf_serving_startup.sh /
-RUN chmod 755 /tf_serving_startup.sh
-CMD ["/bin/sh", "-c", "/tf_serving_startup.sh"]
+COPY generate_config.py tf_serving_startup.sh /opt/
+RUN chmod 755 /opt/tf_serving_startup.sh
 
-
-#CMD ["/bin/bash"]
+CMD ["/bin/sh", "-c", "/opt/tf_serving_startup.sh"]
