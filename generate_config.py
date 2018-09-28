@@ -82,11 +82,6 @@ if __name__ == '__main__':
     AWS_SECRET_ACCESS_KEY = str(ARGS.aws_secret_access_key)
     MODEL_PREFIX = str(ARGS.model_prefix)
 
-    AWS_S3_BUCKET = 'deepcell-output'
-    AWS_ACCESS_KEY_ID = 'AKIAJOWNMUPCEMB6YDYQ'
-    AWS_SECRET_ACCESS_KEY = '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'
-    MODEL_PREFIX = 'models/'
-
     if not MODEL_PREFIX.endswith('/'):
         MODEL_PREFIX = MODEL_PREFIX + '/'
     
