@@ -10,36 +10,40 @@ for Tensorflow Serving
 """
 
 import os
-import boto3
 import argparse
+
+import boto3
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # Generate model.conf
-def gen_config(aws_s3_bucket, aws_access_key_id, aws_secret_access_key, model_prefix): 
+def gen_config(aws_s3_bucket, aws_access_key_id, aws_secret_access_key, model_prefix):
     # Create boto client object
     s3client = boto3.client('s3',
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key)
-    
+
     # Get every object in specified bucket
-    directories_verbose = s3client.list_objects_v2(Bucket=aws_s3_bucket, StartAfter=model_prefix)
-    
+    directories_verbose = s3client.list_objects_v2(
+        Bucket=aws_s3_bucket, StartAfter=model_prefix)
+
     # Get unique list of model names
     models_list = set([])
-    
+
     for directory in directories_verbose['Contents']:
-        directory_name = directory['Key'].replace(model_prefix, '').split('/')
-        models_list.add(directory_name[0])
-    
+        if directory['Key'].startswith(model_prefix):
+            dirnames = directory['Key'].replace(model_prefix, '').split('/')
+            if len(dirnames) > 1:
+                models_list.add(dirnames[0])
+
     # Create config file and write config block for each model
     conf_file_path = os.path.join(ROOT_DIR, 'models.conf')
     with open(conf_file_path, 'w+') as config_file:
-    
+
         config_file.write('model_config_list: {\n')
-    
+
         for model in models_list:
             config_file.write('    config: {\n')
             config_file.write('        name: "{}"\n'.format(model))
@@ -80,7 +84,6 @@ if __name__ == '__main__':
 
     if not MODEL_PREFIX.endswith('/'):
         MODEL_PREFIX = MODEL_PREFIX + '/'
-    
+
     # Generate configuration file
     gen_config(AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, MODEL_PREFIX)
-
