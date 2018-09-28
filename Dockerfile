@@ -20,10 +20,16 @@ FROM ${TF_SERVING_BUILD_IMAGE}
 # Dealing with a keyboard issue
 COPY ./keyboard /etc/default/keyboard
 
-RUN pip install boto3
+RUN apt-get update && apt-get install -y python3 \
+        python3-pip
+
+RUN pip3 install boto3 \
+        google-cloud-storage \
+        python-decouple
 
 # Including our functions
 COPY generate_config.py tf_serving_startup.sh /opt/
 RUN chmod 755 /opt/tf_serving_startup.sh
 
+#CMD sleep 10000
 CMD ["/bin/sh", "-c", "/opt/tf_serving_startup.sh"]
