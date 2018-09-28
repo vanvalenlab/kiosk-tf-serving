@@ -1,6 +1,6 @@
 #!/bin/sh
 
-python /opt/generate_config.py \
+python3 /opt/generate_config.py \
    --model_prefix=$MODEL_PREFIX \
    --aws_s3_bucket=$AWS_S3_BUCKET \
    --aws_access_key_id=$AWS_ACCESS_KEY_ID \
