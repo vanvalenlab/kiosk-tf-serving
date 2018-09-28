@@ -10,8 +10,9 @@ for Tensorflow Serving
 """
 
 import os
-import boto3
 import argparse
+
+import boto3
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,14 +26,17 @@ def gen_config(aws_s3_bucket, aws_access_key_id, aws_secret_access_key, model_pr
         aws_secret_access_key=aws_secret_access_key)
     
     # Get every object in specified bucket
-    directories_verbose = s3client.list_objects_v2(Bucket=aws_s3_bucket, StartAfter=model_prefix)
+    directories_verbose = s3client.list_objects_v2(
+        Bucket=aws_s3_bucket, StartAfter=model_prefix)
     
     # Get unique list of model names
     models_list = set([])
     
     for directory in directories_verbose['Contents']:
-        directory_name = directory['Key'].replace(model_prefix, '').split('/')
-        models_list.add(directory_name[0])
+        if directory['Key'].startswith(model_prefix):
+            dirnames = directory['Key'].replace(model_prefix, '').split('/')
+            if len(dirnames) > 1:
+                models_list.add(dirnames[0])
     
     # Create config file and write config block for each model
     conf_file_path = os.path.join(ROOT_DIR, 'models.conf')
@@ -77,6 +81,11 @@ if __name__ == '__main__':
     AWS_ACCESS_KEY_ID = str(ARGS.aws_access_key_id)
     AWS_SECRET_ACCESS_KEY = str(ARGS.aws_secret_access_key)
     MODEL_PREFIX = str(ARGS.model_prefix)
+
+    AWS_S3_BUCKET = 'deepcell-output'
+    AWS_ACCESS_KEY_ID = 'AKIAJOWNMUPCEMB6YDYQ'
+    AWS_SECRET_ACCESS_KEY = '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'
+    MODEL_PREFIX = 'models/'
 
     if not MODEL_PREFIX.endswith('/'):
         MODEL_PREFIX = MODEL_PREFIX + '/'
