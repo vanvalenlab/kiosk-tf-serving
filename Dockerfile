@@ -15,35 +15,21 @@
 ARG TF_SERVING_VERSION=1.10.1
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
 
-FROM ${TF_SERVING_BUILD_IMAGE} as build_image
-FROM nvcr.io/nvidia/tensorflow:18.08-py3
-#FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
-
-ARG TF_SERVING_VERSION_GIT_BRANCH=master
-ARG TF_SERVING_VERSION_GIT_COMMIT=head
-
-LABEL maintainer="gvasudevan@google.com"
-LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
-LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
+FROM ${TF_SERVING_BUILD_IMAGE}
 
 # Dealing with a keyboard issue
 COPY ./keyboard /etc/default/keyboard
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
-        libgomp1 \
-        ca-certificates \
-        && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-        #nvidia-cuda-toolkit \
+RUN apt-get update && apt-get install -y python3 \
+        python3-pip
 
-# Install TF Serving GPU pkg
-COPY --from=build_image /usr/local/bin/tensorflow_model_server /usr/bin/tensorflow_model_server
-
-RUN pip install boto3
+RUN pip3 install boto3 \
+        google-cloud-storage \
+        python-decouple
 
 # Including our functions
 COPY generate_config.py tf_serving_startup.sh /opt/
 RUN chmod 755 /opt/tf_serving_startup.sh
 
+#CMD sleep 10000
 CMD ["/bin/sh", "-c", "/opt/tf_serving_startup.sh"]

@@ -13,47 +13,115 @@ import os
 import argparse
 
 import boto3
-
+from google.cloud import storage
+from decouple import config
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# create global variables
+CLOUD = config('CLOUD_PROVIDER', default="aws")
+GOOGLE_BUCKET = config('GKE_BUCKET', default="default-bucket")
 
-# Generate model.conf
-def gen_config(aws_s3_bucket, aws_access_key_id, aws_secret_access_key, model_prefix):
-    # Create boto client object
-    s3client = boto3.client('s3',
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key)
+# create connection to appropriate cloud service
+def connect_client():    
+    if CLOUD=='aws':
+        # Create boto client object
+        s3client = boto3.client('s3',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key)
+        client = s3client
+    elif CLOUD=='gke':
+        gcloud_client = storage.Client()
+        client = gcloud_client
+    else:
+        raise Exception
 
-    # Get every object in specified bucket
-    directories_verbose = s3client.list_objects_v2(
-        Bucket=aws_s3_bucket, StartAfter=model_prefix)
+    return client
 
-    # Get unique list of model names
+# Get every object in specified bucket
+def get_bucket_objects(client):
+    if CLOUD=='aws':
+        directories_verbose = s3client.list_objects_v2(
+            Bucket=aws_s3_bucket, StartAfter=model_prefix)
+    elif CLOUD=='gke':
+        bucket = client.get_bucket( GOOGLE_BUCKET )
+        objects = bucket.list_blobs()
+        all_objects = []
+        for new_object in objects:
+            all_objects.append( new_object.name )
+        directories_verbose = all_objects
+    else:
+        raise Exception
+
+    return directories_verbose
+
+# Get unique list of model names
+def get_unique_models( directories_verbose, model_prefix ):
     models_list = set([])
+    if CLOUD=='aws':
+        for directory in directories_verbose['Contents']:
+            if directory['Key'].startswith(model_prefix):
+                dirnames = directory['Key'].replace(model_prefix, '').split('/')
+                if len(dirnames) > 1:
+                    models_list.add(dirnames[0])
+    elif CLOUD=='gke':
+        for object_name in directories_verbose:
+            if object_name.startswith( model_prefix ):
+                dirnames = object_name.replace(model_prefix, '').split('/')
+                if len(dirnames) > 1:
+                    models_list.add(dirnames[0])
+    else:
+        raise Exception
 
-    for directory in directories_verbose['Contents']:
-        if directory['Key'].startswith(model_prefix):
-            dirnames = directory['Key'].replace(model_prefix, '').split('/')
-            if len(dirnames) > 1:
-                models_list.add(dirnames[0])
+    return models_list
 
-    # Create config file and write config block for each model
+# Create config file and write config block for each model
+def write_models_conf( models_list, model_prefix ):
     conf_file_path = os.path.join(ROOT_DIR, 'models.conf')
     with open(conf_file_path, 'w+') as config_file:
 
         config_file.write('model_config_list: {\n')
 
-        for model in models_list:
-            config_file.write('    config: {\n')
-            config_file.write('        name: "{}"\n'.format(model))
-            config_file.write('        base_path: "s3://{}/{}{}"\n'.format(aws_s3_bucket, model_prefix, model))
-            config_file.write('        model_platform: "tensorflow"\n')
-            config_file.write('        model_version_policy: {\n')
-            config_file.write('            all: {}\n')
-            config_file.write('        }\n')
-            config_file.write('    }\n')
-        config_file.write('}\n')
+        if CLOUD=='aws':
+            for model in models_list:
+                config_file.write('    config: {\n')
+                config_file.write('        name: "{}"\n'.format(model))
+                config_file.write('        base_path: "s3://{}/{}{}"\n'.format(aws_s3_bucket, model_prefix, model))
+                config_file.write('        model_platform: "tensorflow"\n')
+                config_file.write('        model_version_policy: {\n')
+                config_file.write('            all: {}\n')
+                config_file.write('        }\n')
+                config_file.write('    }\n')
+            config_file.write('}\n')
+        elif CLOUD=='gke':
+            for model in models_list:
+                config_file.write('    config: {\n')
+                config_file.write('        name: "{}"\n'.format(model))
+                config_file.write('        base_path: "gs://{}/{}{}"\n'.format(GOOGLE_BUCKET, model_prefix, model))
+                config_file.write('        model_platform: "tensorflow"\n')
+                config_file.write('        model_version_policy: {\n')
+                config_file.write('            all: {}\n')
+                config_file.write('        }\n')
+                config_file.write('    }\n')
+            config_file.write('}\n')
+        else:
+            raise Exception
+
+# Generate model.conf
+def gen_config(aws_s3_bucket, aws_access_key_id, aws_secret_access_key, model_prefix):
+
+    # create connection to appropriate cloud service
+    client = connect_client()
+
+    # Get every object in specified bucket
+    directories_verbose = get_bucket_objects(client)
+
+    # Get unique list of model names
+    models_list = get_unique_models( directories_verbose, model_prefix )
+
+    # Create config file and write config block for each model
+    write_models_conf( models_list, model_prefix )
+    
 
 def get_arg_parser():
     """argument parser to consume command line arguments"""
