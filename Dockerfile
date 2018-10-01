@@ -20,16 +20,18 @@ FROM ${TF_SERVING_BUILD_IMAGE}
 # Dealing with a keyboard issue
 COPY ./keyboard /etc/default/keyboard
 
-RUN apt-get update && apt-get install -y python3 \
-        python3-pip
+WORKDIR /kiosk/tf-serving
 
-RUN pip3 install boto3 \
-        google-cloud-storage \
-        python-decouple
+ENV RPC_PORT=8500 \
+    REST_PORT=8501 \
+    REST_TIMEOUT=60000 \
+    TF_SERVING_CONFIG_FILE=/kiosk/tf-serving/models.conf
 
-# Including our functions
-COPY generate_config.py tf_serving_startup.sh /opt/
-RUN chmod 755 /opt/tf_serving_startup.sh
+# Copy requirements.txt and install python dependencies
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
-#CMD sleep 10000
-CMD ["/bin/sh", "-c", "/opt/tf_serving_startup.sh"]
+# Copy python script to generate model configuration file
+COPY write_config_file.py bin/entrypoint.sh ./
+
+ENTRYPOINT "/kiosk/tf-serving/entrypoint.sh"
