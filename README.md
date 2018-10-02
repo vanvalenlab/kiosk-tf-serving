@@ -1,2 +1,2 @@
-# tensorflow_serving_s3
-Tensorflow-serving with S3 intergration
+# kiosk-tf-serving
+TensorFlow-Serving configuration files automatically generated based on the contents of a storage bucket.

@@ -1,17 +1,30 @@
-# Copyright 2018 Google LLC
+# Copyright 2016-2018 The Van Valen Lab at the California Institute of
+# Technology (Caltech), with support from the Paul Allen Family Foundation,
+# Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
+# All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under a modified Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.github.com/vanvalenlab/kiosk-tf-serving/LICENSE
+#
+# The Work provided may be used for non-commercial academic purposes only.
+# For any other use of the Work, including commercial use, please contact:
+# vanvalenlab@gmail.com
+#
+# Neither the name of Caltech nor the names of its contributors may be used
+# to endorse or promote products derived from this software without specific
+# prior written permission.
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ============================================================================
 
+# Using official tensorflow-serving as base image
 ARG TF_SERVING_VERSION=1.10.1
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
 
@@ -20,16 +33,18 @@ FROM ${TF_SERVING_BUILD_IMAGE}
 # Dealing with a keyboard issue
 COPY ./keyboard /etc/default/keyboard
 
-RUN apt-get update && apt-get install -y python3 \
-        python3-pip
+WORKDIR /kiosk/tf-serving
 
-RUN pip3 install boto3 \
-        google-cloud-storage \
-        python-decouple
+ENV RPC_PORT=8500 \
+    REST_PORT=8501 \
+    REST_TIMEOUT=60000 \
+    TF_SERVING_CONFIG_FILE=/kiosk/tf-serving/models.conf
 
-# Including our functions
-COPY generate_config.py tf_serving_startup.sh /opt/
-RUN chmod 755 /opt/tf_serving_startup.sh
+# Copy requirements.txt and install python dependencies
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
-#CMD sleep 10000
-CMD ["/bin/sh", "-c", "/opt/tf_serving_startup.sh"]
+# Copy python script to generate model configuration file
+COPY write_config_file.py bin/entrypoint.sh ./
+
+ENTRYPOINT "/kiosk/tf-serving/entrypoint.sh"
