@@ -165,10 +165,6 @@ def get_arg_parser():
                         choices=['aws', 'gke'],
                         required=True,
                         help='Cloud Provider')
-    
-    parser.add_argument('-b', '--bucket',
-                        required=True,
-                        help='Cloud Storage Bucket')
 
     parser.add_argument('-p', '--model-prefix',
                         default='/',
@@ -184,23 +180,20 @@ def get_arg_parser():
 if __name__ == '__main__':
     initialize_logger()
 
-    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=False)
-    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=False)
-
     # Get command line arguments
     args = get_arg_parser().parse_args()
 
     # Create the ConfigWriter based on the cloud provider
     if args.cloud_provider.lower() == 'aws':
         writer = S3ConfigWriter(
-            bucket=args.bucket,
+            bucket=config('AWS_S3_BUCKET'),
             model_prefix=args.model_prefix,
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
 
     elif args.cloud_provider.lower() == 'gke':
         writer = GCSConfigWriter(
-            bucket=args.bucket,
+            bucket=config('GCLOUD_STORAGE_BUCKET'),
             model_prefix=args.model_prefix)
     
     else:

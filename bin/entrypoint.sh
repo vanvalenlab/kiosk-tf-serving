@@ -3,7 +3,6 @@
 # write the configuration file
 python write_config_file.py \
     --cloud-provider=$CLOUD_PROVIDER \
-    --bucket=$BUCKET \
     --model-prefix=$MODEL_PREFIX \
     --file-path=$TF_SERVING_CONFIG_FILE \
   && \
