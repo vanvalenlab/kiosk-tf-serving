@@ -187,7 +187,7 @@ if __name__ == '__main__':
     initialize_logger()
 
     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=False)
-    AWS_ACCESS_KEY_SECRET = config('AWS_ACCESS_KEY_SECRET', default=False)
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=False)
 
     # Get command line arguments
     args = get_arg_parser().parse_args()
@@ -198,7 +198,7 @@ if __name__ == '__main__':
             bucket=args.bucket,
             model_prefix=args.model_prefix,
             aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_ACCESS_KEY_SECRET)
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
     elif args.cloud_provider.lower() == 'gke':
         writer = GCSConfigWriter(
