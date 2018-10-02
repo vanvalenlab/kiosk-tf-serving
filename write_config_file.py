@@ -20,8 +20,8 @@ class TFServingConfigWriter(object):
     and writes them in a config file for TensorFlow Serving
     """
 
-    def __init__(self, bucket, model_prefix):
-        self._storage_protocol = None
+    def __init__(self, bucket, model_prefix, protocol=None):
+        self._storage_protocol = protocol
         self.bucket = bucket
         self.model_prefix = model_prefix
         self.logger = logging.getLogger(str(self.__class__.__name__))
@@ -104,11 +104,10 @@ class S3ConfigWriter(TFServingConfigWriter):
                  model_prefix,
                  aws_access_key_id,
                  aws_secret_access_key):
-        self._storage_protocol = 's3'
         self.client = boto3.client('s3',
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key)
-        super(S3ConfigWriter, self).__init__(bucket, model_prefix)
+        super(S3ConfigWriter, self).__init__(bucket, model_prefix, 's3')
     
     def _get_models_from_bucket(self):
         """Query the cloud storage bucket for tensorflow servables
@@ -126,9 +125,8 @@ class S3ConfigWriter(TFServingConfigWriter):
 class GCSConfigWriter(TFServingConfigWriter):
 
     def __init__(self, bucket, model_prefix):
-        self._storage_protocol = 'gs'
         self.client = google_storage.Client()
-        super(GCSConfigWriter, self).__init__(bucket, model_prefix)
+        super(GCSConfigWriter, self).__init__(bucket, model_prefix, 'gs')
     
     def _get_models_from_bucket(self):
         """Query the cloud storage bucket for tensorflow servables
