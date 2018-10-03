@@ -3,7 +3,7 @@ TensorFlow-Serving configuration files automatically generated based on the cont
 
 ### TensorFlow Serving
 
-This repo contains the files necessary to build a container to run tensorflow serving.
+This repo contains the files necessary to build a container to run tensorflow serving.  The container will run `write_config_file.py` which will read files from a cloud bucket and deploy tensorflow-serving based on an auto-generated config file.  This will expose all versions of all models in the bucket via RPC API and REST API.
 
 Compile the docker container by running
 
