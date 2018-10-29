@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ "$DEBUG" == "TRUE" ]
+then  
+while true; do sleep 10000; done
+else
 # write the configuration file
 python write_config_file.py \
     --cloud-provider=$CLOUD_PROVIDER \
@@ -13,4 +17,4 @@ tensorflow_model_server \
     --model_config_file=$TF_SERVING_CONFIG_FILE \
   && \
 /bin/bash # hack to keep from exiting
-# while true; do sleep 1000; done
+fi
