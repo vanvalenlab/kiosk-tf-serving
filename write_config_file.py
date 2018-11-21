@@ -164,7 +164,8 @@ class GCSConfigWriter(TFServingConfigWriter):
             yield model
 
 
-def initialize_logger(debug_mode=False):
+def initialize_logger(log_level='DEBUG'):
+    log_level = str(log_level).upper()
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
@@ -172,10 +173,16 @@ def initialize_logger(debug_mode=False):
     console = logging.StreamHandler(stream=sys.stdout)
     console.setFormatter(formatter)
 
-    if debug_mode:
-        console.setLevel(logging.DEBUG)
-    else:
+    if log_level == 'CRITICAL':
+        console.setLevel(logging.CRITICAL)
+    elif log_level == 'ERROR':
+        console.setLevel(logging.ERROR)
+    elif log_level == 'WARN':
+        console.setLevel(logging.WARN)
+    elif log_level == 'INFO':
         console.setLevel(logging.INFO)
+    else:
+        console.setLevel(logging.DEBUG)
 
     logger.addHandler(console)
 
@@ -203,7 +210,7 @@ def get_arg_parser():
 
 
 if __name__ == '__main__':
-    initialize_logger()
+    initialize_logger(config('LOG_LEVEL', default='DEBUG'))
 
     # Get command line arguments
     args = get_arg_parser().parse_args()
