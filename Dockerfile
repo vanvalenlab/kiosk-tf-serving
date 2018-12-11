@@ -30,9 +30,6 @@ ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
 
 FROM ${TF_SERVING_BUILD_IMAGE}
 
-# Dealing with a keyboard issue
-COPY ./keyboard /etc/default/keyboard
-
 WORKDIR /kiosk/tf-serving
 
 ENV RPC_PORT=8500 \
