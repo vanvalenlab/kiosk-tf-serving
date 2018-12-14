@@ -32,6 +32,7 @@ import contextlib
 import os
 import shutil
 import tempfile
+import six
 
 import pytest
 
@@ -70,7 +71,7 @@ class TestTFServingConfigWriter(object):
         writer = self._get_writer()
         model_name = 'test-model'
         url = writer.get_model_url(model_name)
-        assert isinstance(url, basestring)
+        assert isinstance(url, six.string_types)
         assert url.startswith(writer._storage_protocol + '://')
         assert writer.bucket in url
         assert url.endswith(writer.model_prefix + model_name)
