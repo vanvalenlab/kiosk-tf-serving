@@ -13,4 +13,3 @@ fail_under = 80
 show_missing = True
 
 omit =
-    redis_consumer/settings.py
