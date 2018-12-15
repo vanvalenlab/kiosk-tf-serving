@@ -15,8 +15,10 @@ pip-delete-this-directory.txt
 .coverage
 .coverage.*
 .cache
+.pytest_cache/
 coverage.xml
 *,cover
 *.log
 .git
 .vscode
+.DS_Store
