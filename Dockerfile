@@ -42,6 +42,6 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 # Copy python script to generate model configuration file
-COPY write_config_file.py bin/entrypoint.sh ./
+COPY . .
 
-ENTRYPOINT "/kiosk/tf-serving/entrypoint.sh"
+ENTRYPOINT "./bin/entrypoint.sh"
