@@ -1,9 +1,13 @@
 # kiosk-tf-serving
-TensorFlow-Serving configuration files automatically generated based on the contents of a storage bucket.
 
-### TensorFlow Serving
+[![Build Status](https://travis-ci.org/vanvalenlab/kiosk-tf-serving.svg?branch=master)](https://travis-ci.org/vanvalenlab/kiosk-tf-serving)
+[![Coverage Status](https://coveralls.io/repos/github/vanvalenlab/kiosk-tf-serving/badge.svg?branch=master)](https://coveralls.io/github/vanvalenlab/kiosk-tf-serving?branch=master)
 
-This repo contains the files necessary to build a container to run tensorflow serving.  The container will run `write_config_file.py` which will read files from a cloud bucket and deploy tensorflow-serving based on an auto-generated config file.  This will expose all versions of all models in the bucket via RPC API and REST API.
+TensorFlow-Serving configuration files automatically generated based on the contents of a storage bucket.  `write_config_file.py` will automatically read the contents of the storage bucket and write a configuration file for tensorflow-serving.
+
+TensorFlow serving will host all versions of all models in the bucket via RPC API and REST API.
+
+## Docker
 
 Compile the docker container by running
 
@@ -12,6 +16,7 @@ docker build --pull -t $(whoami)/kiosk-tf-serving .
 ```
 
 Run the docker container by running
+
 ```bash
 NV_GPU='0' nvidia-docker run -it \
     --runtime=nvidia \
