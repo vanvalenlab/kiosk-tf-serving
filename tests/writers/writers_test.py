@@ -30,6 +30,7 @@ from __future__ import print_function
 
 import contextlib
 import os
+import json
 import shutil
 import tempfile
 import six
@@ -108,15 +109,32 @@ class TestTFServingConfigWriter(object):
     def test_write(self):
         writer = self._get_writer()
         # monkey-patch the get_models function
-        pre = 'models'
-        get_list = lambda: ['{}{}/model.pb'.format(pre, i) for i in range(5)]
+        pre = writer.model_prefix
+        N = 5
+        get_list = lambda: ['{}{}/model.pb'.format(pre, i) for i in range(N)]
         writer._get_models_from_bucket = get_list
 
         with tempdir() as dirpath:
             path = os.path.join(dirpath, 'model.conf')
             writer.write(path)
+            # test existence
             assert os.path.exists(path)
             assert os.path.isfile(path)
+            # test correctness
+            with open(path) as f:
+                content = f.readlines()
+                assert content[0] == 'model_config_list: {\n'
+                assert len(content) == N * 8 + 2
+                clean = lambda x: x.replace(' ', '').replace('\n', '')
+                for n in range(N):
+                    i = n * 8 + 1  # starting line num for each model
+                    assert clean(content[i]) == 'config:{'
+                    inside = set([clean(c) for c in content[i + 1: i + 7]])
+                    # model_name from `_get_models_from_bucket`
+                    model_name = '{}{}/model.pb'.format(pre, n)
+                    assert 'name:"{}"'.format(model_name) in inside
+                    bp = writer.get_model_url(model_name)
+                    assert 'base_path:"{}"'.format(bp) in inside
 
         with tempdir() as dirpath:
             path = os.path.join(dirpath, 'model.conf')
