@@ -30,14 +30,13 @@ from __future__ import print_function
 
 import contextlib
 import os
-import json
 import shutil
 import tempfile
 import six
 
 import pytest
 
-from writers.writers import TFServingConfigWriter
+from writers import writers
 
 
 # Workaround for python2 not supporting `with tempfile.TemporaryDirectory() as`
@@ -66,7 +65,7 @@ class TestTFServingConfigWriter(object):
     def _get_writer(self):
         bucket = 'test-bucket'
         prefix = 'models'
-        return TFServingConfigWriter(bucket, prefix, protocol='test')
+        return writers.TFServingConfigWriter(bucket, prefix, protocol='test')
 
     def test_get_model_url(self):
         writer = self._get_writer()
@@ -145,3 +144,115 @@ class TestTFServingConfigWriter(object):
     def test_get_models_from_bucket(self):
         with pytest.raises(NotImplementedError):
             self._get_writer()._get_models_from_bucket()
+
+
+class TestS3ConfigWriter(object):
+
+    def test_write(self):
+
+        class DummyClient(object):
+            def __init__(self, prefix='models', num=5):
+                self.prefix = prefix
+                self.num = num
+
+            def _iter(self):
+                pre = '/'.join(p for p in self.prefix.split('/') if p)
+                for i in range(self.num):
+                    yield {'Key': '{}/{}/model.pb'.format(pre, i)}
+
+            def list_objects_v2(self, Bucket, StartAfter):
+                contents = [x for x in self._iter()]
+                return {'Contents': contents}
+
+        N = 3
+        bucket = 'test-bucket'
+        prefix = 'models'
+        aws_access_key_id = 'testAccessKeyId'
+        aws_secret_access_key = 'testSecretAccessKey'
+        writer = writers.S3ConfigWriter(bucket, prefix,
+                                        aws_access_key_id,
+                                        aws_secret_access_key)
+        writer.client = DummyClient(prefix, N)
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'model.conf')
+            writer.write(path)
+            # test existence
+            assert os.path.exists(path)
+            assert os.path.isfile(path)
+            # test correctness
+            with open(path) as f:
+                content = f.readlines()
+                assert content[0] == 'model_config_list: {\n'
+                assert len(content) == N * 8 + 2
+                clean = lambda x: x.replace(' ', '').replace('\n', '')
+                for n in range(N):
+                    i = n * 8 + 1  # starting line num for each model
+                    assert clean(content[i]) == 'config:{'
+                    inside = set([clean(c) for c in content[i + 1: i + 7]])
+                    assert 'name:"{}"'.format(n) in inside
+                    bp = writer.get_model_url(n)
+                    assert 'base_path:"{}"'.format(bp) in inside
+
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'model.conf')
+            writer._get_models_from_bucket = lambda: []
+            with pytest.raises(Exception):
+                writer.write(path)
+
+
+class TestGSCConfigWriter(object):
+
+    def test_write(self):
+
+        class DummyBucket(object):
+            def __init__(self, name, num=5):
+                self.name = name
+                self.num = num
+
+        class DummyClient(object):
+            def __init__(self, prefix='models', num=5):
+                self.prefix = prefix
+                self.name = prefix
+                self.num = num
+
+            def get_bucket(self, bucket):
+                return DummyClient(bucket, self.num)
+
+            def list_blobs(self, prefix):
+                pre = '/'.join(p for p in prefix.split('/') if p)
+                for i in range(self.num):
+                    name = '{}/{}/model.pb'.format(pre, i)
+                    yield DummyBucket(name, self.num)
+
+        N = 3
+        bucket = 'test-bucket'
+        prefix = 'models'
+        writer = writers.GCSConfigWriter(bucket, prefix)
+        writer.client = DummyClient(prefix, N)
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'model.conf')
+            writer.write(path)
+            # test existence
+            assert os.path.exists(path)
+            assert os.path.isfile(path)
+            # test correctness
+            with open(path) as f:
+                content = f.readlines()
+                import warnings
+                warnings.warn('%s' % ''.join(content))
+                assert content[0] == 'model_config_list: {\n'
+                assert len(content) == N * 8 + 2
+                clean = lambda x: x.replace(' ', '').replace('\n', '')
+                for n in range(N):
+                    i = n * 8 + 1  # starting line num for each model
+                    assert clean(content[i]) == 'config:{'
+                    inside = set([clean(c) for c in content[i + 1: i + 7]])
+                    assert 'name:"{}"'.format(n) in inside
+                    bp = writer.get_model_url(n)
+                    assert 'base_path:"{}"'.format(bp) in inside
+
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'model.conf')
+            writer._get_models_from_bucket = lambda: []
+            with pytest.raises(Exception):
+                writer.write(path)
