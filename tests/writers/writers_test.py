@@ -182,8 +182,6 @@ class TestS3ConfigWriter(object):
             # test correctness
             with open(path) as f:
                 content = f.readlines()
-                import warnings
-                warnings.warn('%s' % ''.join(c for c in content))
                 assert content[0] == 'model_config_list: {\n'
                 assert len(content) == N * 8 + 2
                 clean = lambda x: x.replace(' ', '').replace('\n', '')
