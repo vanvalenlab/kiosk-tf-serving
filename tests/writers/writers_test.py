@@ -198,3 +198,61 @@ class TestS3ConfigWriter(object):
             writer._get_models_from_bucket = lambda: []
             with pytest.raises(Exception):
                 writer.write(path)
+
+
+class TestGSCConfigWriter(object):
+
+    def test_write(self):
+
+        class DummyBucket(object):
+            def __init__(self, name, num=5):
+                self.name = name
+                self.num = num
+
+        class DummyClient(object):
+            def __init__(self, prefix='models', num=5):
+                self.prefix = prefix
+                self.name = prefix
+                self.num = num
+
+            def get_bucket(self, bucket):
+                return DummyClient(bucket, self.num)
+
+            def list_blobs(self, prefix):
+                pre = '/'.join(p for p in prefix.split('/') if p)
+                for i in range(self.num):
+                    name = '{}/{}/model.pb'.format(pre, i)
+                    yield DummyBucket(name, self.num)
+
+        N = 3
+        bucket = 'test-bucket'
+        prefix = 'models'
+        writer = writers.GCSConfigWriter(bucket, prefix)
+        writer.client = DummyClient(prefix, N)
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'model.conf')
+            writer.write(path)
+            # test existence
+            assert os.path.exists(path)
+            assert os.path.isfile(path)
+            # test correctness
+            with open(path) as f:
+                content = f.readlines()
+                import warnings
+                warnings.warn('%s' % ''.join(content))
+                assert content[0] == 'model_config_list: {\n'
+                assert len(content) == N * 8 + 2
+                clean = lambda x: x.replace(' ', '').replace('\n', '')
+                for n in range(N):
+                    i = n * 8 + 1  # starting line num for each model
+                    assert clean(content[i]) == 'config:{'
+                    inside = set([clean(c) for c in content[i + 1: i + 7]])
+                    assert 'name:"{}"'.format(n) in inside
+                    bp = writer.get_model_url(n)
+                    assert 'base_path:"{}"'.format(bp) in inside
+
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'model.conf')
+            writer._get_models_from_bucket = lambda: []
+            with pytest.raises(Exception):
+                writer.write(path)
