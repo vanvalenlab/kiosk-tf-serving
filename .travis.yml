@@ -13,7 +13,6 @@ python:
 
 cache: pip
 
-# Only deploy if master branch or like a release
 install:
   - pip install -r requirements.txt
   - pip install pytest pytest-cov==2.5.1 pytest-pep8 coveralls
