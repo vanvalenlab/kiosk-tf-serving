@@ -12,14 +12,8 @@ python:
   - 3.6
 
 # Only deploy if master branch or like a release
-stages:
-  - test
-  - name: deploy
-    if: branch = master OR branch =~ ^r[0-9]+.[0-9]+
-
-
 install:
-  pip install -r requirements.txt
+  pip install -r requirements.txt pytest pytest-cov pytest-pep8
 
 script:
   - python -m pytest --cov=writers --pep8 writers tests
@@ -27,7 +21,7 @@ script:
 jobs:
   include:
     - stage: deploy
-      python: 3.5
+      if: branch = master OR branch =~ ^r[0-9]+.[0-9]+
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - docker build -t "$TRAVIS_REPO_SLUG" .
