@@ -13,7 +13,8 @@ python:
 
 # Only deploy if master branch or like a release
 install:
-  pip install -r requirements.txt pytest pytest-cov pytest-pep8
+  - pip install -r requirements.txt
+  - pip install pytest pytest-cov pytest-pep8 coveralls
 
 script:
   - python -m pytest --cov=writers --pep8 writers tests
