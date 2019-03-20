@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$DEBUG" == "TRUE" ]
-then  
+then
 while true; do sleep 10000; done
 else
 
