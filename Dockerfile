@@ -33,8 +33,9 @@ FROM ${TF_SERVING_BUILD_IMAGE}
 WORKDIR /kiosk/tf-serving
 
 ENV RPC_PORT=8500 \
-    REST_PORT=8501 \
-    REST_TIMEOUT=60000 \
+    REST_PORT=0 \
+    REST_TIMEOUT=30000 \
+    ENABLE_BATCHING=false \
     TF_SERVING_CONFIG_FILE=/kiosk/tf-serving/models.conf
 
 # Copy requirements.txt and install python dependencies

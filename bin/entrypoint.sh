@@ -16,6 +16,7 @@ tensorflow_model_server \
     --rest_api_port=$REST_PORT \
     --rest_api_timeout_in_ms=$REST_TIMEOUT \
     --model_config_file=$TF_SERVING_CONFIG_FILE \
+    --enable_batching=$ENABLE_BATCHING \
   && \
 /bin/bash # hack to keep from exiting
 
