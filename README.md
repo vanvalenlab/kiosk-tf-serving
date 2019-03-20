@@ -21,8 +21,9 @@ Run the docker container by running
 NV_GPU='0' nvidia-docker run -it \
     --runtime=nvidia \
     -e MODEL_PREFIX=models \
-    -e RPC_PORT=8500 \
-    -e REST_PORT=8501 \
+    -e PORT=8500 \
+    -e REST_API_PORT=8501 \
+    -e REST_API_TIMEOUT=30000 \
     -e CLOUD_PROVIDER=aws \
     -e AWS_S3_BUCKET=YOUR_BUCKET_NAME \
     -e AWS_ACCESS_KEY_ID=YOUR_KEY_ID \
