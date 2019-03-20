@@ -17,6 +17,7 @@ tensorflow_model_server \
     --rest_api_timeout_in_ms=$REST_TIMEOUT \
     --model_config_file=$MODEL_CONFIG_FILE \
     --enable_batching=$ENABLE_BATCHING \
+    --grpc_channel_arguments=$GRPC_CHANNEL_ARGS \
   && \
 /bin/bash # hack to keep from exiting
 
