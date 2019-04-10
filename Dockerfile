@@ -36,6 +36,7 @@ ENV PORT=8500 \
     REST_API_PORT=0 \
     REST_API_TIMEOUT=30000 \
     ENABLE_BATCHING=false \
+    TF_CPP_MIN_LOG_LEVEL=0 \
     GRPC_CHANNEL_ARGS="" \
     MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf
 
