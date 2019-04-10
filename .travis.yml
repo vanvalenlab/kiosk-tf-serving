@@ -18,7 +18,7 @@ install:
   - pip install pytest pytest-cov==2.5.1 pytest-pep8 coveralls
 
 script:
-  - python -m pytest --cov=writers --pep8 writers tests
+  - pytest --pep8 --cov=writers
 
 jobs:
   include:

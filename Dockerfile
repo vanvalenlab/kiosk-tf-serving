@@ -1,4 +1,4 @@
-# Copyright 2016-2018 The Van Valen Lab at the California Institute of
+# Copyright 2016-2019 The Van Valen Lab at the California Institute of
 # Technology (Caltech), with support from the Paul Allen Family Foundation,
 # Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
 # All rights reserved.
@@ -36,6 +36,7 @@ ENV PORT=8500 \
     REST_API_PORT=0 \
     REST_API_TIMEOUT=30000 \
     ENABLE_BATCHING=false \
+    TF_CPP_MIN_LOG_LEVEL=0 \
     GRPC_CHANNEL_ARGS="" \
     MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf
 
