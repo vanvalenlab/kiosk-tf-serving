@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ "$DEBUG" == "TRUE" ]
-then
-while true; do sleep 10000; done
-else
-
 # write the configuration file
 python write_config_file.py \
     --cloud-provider=$CLOUD_PROVIDER \
