@@ -13,5 +13,6 @@ tensorflow_model_server \
     --model_config_file=$MODEL_CONFIG_FILE \
     --enable_batching=$ENABLE_BATCHING \
     --grpc_channel_arguments=$GRPC_CHANNEL_ARGS \
+    --monitoring_config_file=./monitoring_config.txt \
   && \
 /bin/bash # hack to keep from exiting
