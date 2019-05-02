@@ -25,7 +25,7 @@
 # ============================================================================
 
 # Using official tensorflow-serving as base image
-ARG TF_SERVING_VERSION=1.10.1
+ARG TF_SERVING_VERSION=1.12.0
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
 
 FROM ${TF_SERVING_BUILD_IMAGE}
@@ -33,7 +33,7 @@ FROM ${TF_SERVING_BUILD_IMAGE}
 WORKDIR /kiosk/tf-serving
 
 ENV PORT=8500 \
-    REST_API_PORT=0 \
+    REST_API_PORT=8501 \
     REST_API_TIMEOUT=30000 \
     ENABLE_BATCHING=false \
     TF_CPP_MIN_LOG_LEVEL=0 \
