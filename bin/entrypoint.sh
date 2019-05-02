@@ -15,5 +15,3 @@ tensorflow_model_server \
     --grpc_channel_arguments=$GRPC_CHANNEL_ARGS \
   && \
 /bin/bash # hack to keep from exiting
-
-fi
