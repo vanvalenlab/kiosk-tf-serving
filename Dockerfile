@@ -39,6 +39,7 @@ ENV PORT=8500 \
     TF_CPP_MIN_LOG_LEVEL=0 \
     AWS_LOG_LEVEL=3 \
     GRPC_CHANNEL_ARGS="" \
+    TF_SESSION_PARALLELISM=0 \
     MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf
 
 # Copy requirements.txt and install python dependencies
