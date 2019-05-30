@@ -9,12 +9,12 @@ python write_config_file.py \
 echo "prometheus_config: {" > $BATCHING_CONFIG_FILE
 echo "  enable: ${PROMETHEUS_MONITORING_ENABLED}," >> $BATCHING_CONFIG_FILE
 echo "  path: ${PROMETHEUS_MONITORING_PATH}" >> $BATCHING_CONFIG_FILE
-echo "}" >> $MONITORING_CONFIG_FILE
+echo "}" >> $MONITORING_CONFIG_FILE \
   && \
 echo "max_batch_size { value: ${MAX_BATCH_SIZE} }" > $MONITORING_CONFIG_FILE
 echo "batch_timeout_micros { value: ${BATCH_TIMEOUT_MICROS} }" >> $MONITORING_CONFIG_FILE
 echo "max_enqueued_batches { value: ${MAX_ENQUEUED_BATCHES} }" >> $MONITORING_CONFIG_FILE
-echo "num_batch_threads { value: $(nproc) }" >> $MONITORING_CONFIG_FILE
+echo "num_batch_threads { value: $(nproc) }" >> $MONITORING_CONFIG_FILE \
   && \
 tensorflow_model_server \
     --port=$PORT \
