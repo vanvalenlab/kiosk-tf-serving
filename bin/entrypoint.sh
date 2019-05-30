@@ -8,7 +8,7 @@ python write_config_file.py \
   && \
 echo "prometheus_config: {" > $MONITORING_CONFIG_FILE
 echo "  enable: ${PROMETHEUS_MONITORING_ENABLED}," >> $MONITORING_CONFIG_FILE
-echo "  path: ${PROMETHEUS_MONITORING_PATH}" >> $MONITORING_CONFIG_FILE
+echo "  path: \"${PROMETHEUS_MONITORING_PATH}\"" >> $MONITORING_CONFIG_FILE
 echo "}" >> $MONITORING_CONFIG_FILE \
   && \
 echo "max_batch_size { value: ${MAX_BATCH_SIZE} }" > $BATCHING_CONFIG_FILE
