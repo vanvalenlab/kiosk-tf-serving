@@ -40,7 +40,14 @@ ENV PORT=8500 \
     AWS_LOG_LEVEL=3 \
     GRPC_CHANNEL_ARGS="" \
     TF_SESSION_PARALLELISM=0 \
-    MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf
+    PROMETHEUS_MONITORING_ENABLED=true \
+    PROMETHEUS_MONITORING_PATH=/monitoring/prometheus/metrics \
+    MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf \
+    BATCHING_CONFIG_FILE=/kiosk/tf-serving/batching_config.txt \
+    MONITORING_CONFIG_FILE=/kiosk/tf-serving/monitoring_config.txt \
+    MAX_BATCH_SIZE=1 \
+    BATCH_TIMEOUT_MICROS=0 \
+    MAX_ENQUEUED_BATCHES=128
 
 # Copy requirements.txt and install python dependencies
 COPY requirements.txt requirements.txt
