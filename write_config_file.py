@@ -103,7 +103,7 @@ def get_arg_parser():
                         help='Full filepath of batch configuration file')
 
     # Monitoring Config Args
-    parser.add_argument('--monitoring-enabled', action='store_true',
+    parser.add_argument('--monitoring-enabled', type=bool, default=True,
                         help='Whether to enable prometheus monitoring.')
 
     parser.add_argument('--monitoring-path',
