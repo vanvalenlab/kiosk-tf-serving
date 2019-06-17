@@ -101,6 +101,79 @@ class TestMonitoringConfigWriter(object):
                     assert content[3] == '}\n'
 
 
+class TestBatchConfigWriter(object):
+
+    def test_bad_inputs(self):
+        # test wrong value types for each parameter
+        # str instead of number yields ValueErrr
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size='two',
+                batch_timeout=0,
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout='zero',
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout=0,
+                max_enqueued_batches='one')
+
+        # test numeric values that are out of bounds.
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=-2,  # must be positive
+                batch_timeout=1,
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout=0,  # must be bigger than 0
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout=1,
+                max_enqueued_batches=-1)  # must be positive
+
+    def test_write(self):
+        writer = writers.BatchConfigWriter(
+            max_batch_size='1',
+            batch_timeout='3000000',
+            max_enqueued_batches=5)
+
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'batch.conf')
+            writer.write(path)
+
+            # test existence
+            assert os.path.exists(path)
+            assert os.path.isfile(path)
+
+            # test correctness
+            with open(path) as f:
+                content = ''.join(f.readlines())
+                required = [
+                    'max_batch_size {',
+                    'value: {}'.format(writer.max_batch_size),
+                    'batch_timeout_micros {',
+                    'value: {}'.format(writer.batch_timeout),
+                    'max_batch_size {',
+                    'value: {}'.format(writer.max_batch_size),
+                    'max_enqueued_batches {',
+                    'value: {}'.format(writer.max_enqueued_batches),
+                    'num_batch_threads {'
+                ]
+                for x in required:
+                    assert x in content
+
 
 class TestModelConfigWriter(object):
 
