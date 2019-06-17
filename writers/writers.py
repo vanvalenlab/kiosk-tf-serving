@@ -31,21 +31,37 @@ from __future__ import print_function
 import logging
 
 
-class TFServingConfigWriter(object):
-    """Abstract Class for ConfigWriter
+class ConfigWriter(object):
+    """Base class for all Writers, must have a write() function."""
+
+    def __init__(self):
+        self.logger = logging.getLogger(str(self.__class__.__name__))
+
+    def write(self, path):
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
+        """
+        raise NotImplementedError
+
+
+class ModelConfigWriter(ConfigWriter):
+    """Abstract Class for ModelConfigWriter
     Reads all servable models from a cloud bucket
-    and writes them in a config file for TensorFlow Serving
+    and writes them in a config file for TensorFlow Serving.
     """
 
     def __init__(self, bucket, model_prefix, protocol=None):
         self._storage_protocol = protocol
         self.bucket = bucket
         self.model_prefix = model_prefix
-        self.logger = logging.getLogger(str(self.__class__.__name__))
 
         # Normalize model prefix
         if not self.model_prefix.endswith('/'):
             self.model_prefix = self.model_prefix + '/'
+
+        super(ModelConfigWriter, self).__init__()
 
     def get_model_url(self, model):
         """Get the URL of the model in the given cloud bucket
@@ -83,9 +99,10 @@ class TFServingConfigWriter(object):
         self.logger.debug('Found Models: %s', ', '.join(models))
 
     def write(self, path):
-        """Create config file and write config block for each model
-        # Arguments:
-            models: list of models to register with tf-serving
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
         """
         self.logger.debug('Writing model config file to %s', path)
         with open(path, 'w+') as config_file:
@@ -121,7 +138,7 @@ class TFServingConfigWriter(object):
         raise NotImplementedError
 
 
-class S3ConfigWriter(TFServingConfigWriter):
+class S3ConfigWriter(ModelConfigWriter):
 
     def __init__(self,
                  bucket,
@@ -148,7 +165,7 @@ class S3ConfigWriter(TFServingConfigWriter):
             yield model
 
 
-class GCSConfigWriter(TFServingConfigWriter):
+class GCSConfigWriter(ModelConfigWriter):
 
     def __init__(self, bucket, model_prefix):
         from google.cloud import storage

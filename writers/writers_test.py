@@ -60,12 +60,21 @@ def tempdir():
         yield dirpath
 
 
-class TestTFServingConfigWriter(object):
+class TestConfigWriter(object):
+
+    def basic_test(self):
+        writer = writers.ModelConfigWriter()
+        assert hasattr(writer, 'write')
+        with pytest.assertRaises(NotImplementedError):
+            writer.write('path/to/config.file')
+
+
+class TestModelConfigWriter(object):
 
     def _get_writer(self):
         bucket = 'test-bucket'
         prefix = 'models'
-        return writers.TFServingConfigWriter(bucket, prefix, protocol='test')
+        return writers.ModelConfigWriter(bucket, prefix, protocol='test')
 
     def test_get_model_url(self):
         writer = self._get_writer()
