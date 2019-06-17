@@ -127,21 +127,21 @@ class TestBatchConfigWriter(object):
         # test numeric values that are out of bounds.
         with pytest.raises(ValueError):
             writer = writers.BatchConfigWriter(
-                max_batch_size=-2,  # must be positive
+                max_batch_size=-2,  # must be non-negative
                 batch_timeout=1,
                 max_enqueued_batches=1)
 
         with pytest.raises(ValueError):
             writer = writers.BatchConfigWriter(
                 max_batch_size=2,
-                batch_timeout=0,  # must be bigger than 0
+                batch_timeout=-1,  # must be non-negative
                 max_enqueued_batches=1)
 
         with pytest.raises(ValueError):
             writer = writers.BatchConfigWriter(
                 max_batch_size=2,
                 batch_timeout=1,
-                max_enqueued_batches=-1)  # must be positive
+                max_enqueued_batches=-1)  # must be non-negative
 
     def test_write(self):
         writer = writers.BatchConfigWriter(

@@ -96,11 +96,11 @@ class BatchConfigWriter(ConfigWriter):
             raise ValueError('`max_batch_size` must be a positive integer. '
                              'Got {}.'.format(self.max_batch_size))
 
-        if self.batch_timeout <= 0:
+        if self.batch_timeout < 0:
             raise ValueError('`batch_timeout` must be a non-negative number. '
                              'Got {}.'.format(self.batch_timeout))
 
-        if self.max_enqueued_batches <= 0:
+        if self.max_enqueued_batches < 0:
             raise ValueError('`max_enqueued_batches` must be a non-negative '
                              'integer. Got {}.'.format(max_enqueued_batches))
 
