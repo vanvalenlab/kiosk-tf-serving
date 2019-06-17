@@ -46,6 +46,23 @@ class ConfigWriter(object):
         raise NotImplementedError
 
 
+class MonitoringConfigWriter(ConfigWriter):
+
+    def write(self, path):
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
+        """
+        self.logger.debug('Writing monitoring config file to %s', path)
+        with open(path, 'w+') as config_file:
+
+            config_file.write('prometheus_config: {\n')
+            config_file.write('  enable: true,\n')
+            config_file.write('  path: "{}")\n'.format(path))
+            config_file.write('}\n')
+
+
 class ModelConfigWriter(ConfigWriter):
     """Abstract Class for ModelConfigWriter
     Reads all servable models from a cloud bucket

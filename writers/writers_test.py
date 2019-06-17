@@ -63,10 +63,43 @@ def tempdir():
 class TestConfigWriter(object):
 
     def basic_test(self):
-        writer = writers.ModelConfigWriter()
+        writer = writers.ConfigWriter()
         assert hasattr(writer, 'write')
-        with pytest.assertRaises(NotImplementedError):
-            writer.write('path/to/config.file')
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'base.conf')
+            with pytest.raises(NotImplementedError):
+                writer.write(path)
+
+
+class TestMonitoringConfigWriter(object):
+
+    def test_write(self):
+        enabled_options = [True, False]
+        monitoring_paths = ['/monitoring/prometheus/metrics', '/other/path']
+
+        for enabled, monitoring_path in zip(enabled_options, monitoring_paths):
+
+            writer = writers.MonitoringConfigWriter(enabled, monitoring_path)
+
+            with tempdir() as dirpath:
+                path = os.path.join(dirpath, 'monitoring.conf')
+                writer.write(path)
+
+                # test existence
+                assert os.path.exists(path)
+                assert os.path.isfile(path)
+
+                # test correctness
+                with open(path) as f:
+                    content = f.readlines()
+                    assert len(content) == 4
+                    assert content[0] == 'prometheus_config: {\n'
+                    assert content[1] == '  enable: {},\n'.format(
+                        str(enabled).lower())
+                    assert content[2] == '  path: "{}"\n'.format(
+                        monitoring_path)
+                    assert content[3] == '}\n'
+
 
 
 class TestModelConfigWriter(object):
