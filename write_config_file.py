@@ -39,8 +39,7 @@ import logging
 
 from decouple import config
 
-from writers import S3ConfigWriter
-from writers import GCSConfigWriter
+import writers
 
 
 def initialize_logger(log_level='DEBUG'):
@@ -72,6 +71,7 @@ def get_arg_parser():
 
     parser = argparse.ArgumentParser()
 
+    # Model Config args
     parser.add_argument('-c', '--cloud-provider',
                         choices=['aws', 'gke'],
                         required=True,
@@ -85,25 +85,49 @@ def get_arg_parser():
                         default=os.path.join(root_dir, 'models.conf'),
                         help='Full filepath of configuration file')
 
+    # Batch Config Args
+    parser.add_argument('--enable-batching', type=bool, default=True,
+                        help='Boolean switch for batching configuration.')
+
+    parser.add_argument('--max-batch-size', type=int, default=1,
+                        help='Maximum batch size for tf-serving.')
+
+    parser.add_argument('--batch-timeout', type=int, default=0,
+                        help='Batch timeout in microseconds.')
+
+    parser.add_argument('--max-enqueued-batches', type=int, default=128,
+                        help='Maximum number of work items to store.')
+
+    parser.add_argument('--batch-file-path',
+                        default=os.path.join(root_dir, 'batch.conf'),
+                        help='Full filepath of batch configuration file')
+
+    # Monitoring Config Args
+    parser.add_argument('--monitoring-enabled', action='store_true',
+                        help='Whether to enable prometheus monitoring.')
+
+    parser.add_argument('--monitoring-path',
+                        default='/monitoring/prometheus/metrics',
+                        help='API endpoint for prometheus scraping.')
+
+    parser.add_argument('--monitoring-file-path',
+                        default=os.path.join(root_dir, 'monitoring.conf'),
+                        help='Full filepath of monitoring configuration file')
+
     return parser
 
 
-if __name__ == '__main__':
-    initialize_logger(config('LOG_LEVEL', default='DEBUG'))
-
-    # Get command line arguments
-    args = get_arg_parser().parse_args()
-
+def write_model_config_file(args):
     # Create the ConfigWriter based on the cloud provider
     if args.cloud_provider.lower() == 'aws':
-        writer = S3ConfigWriter(
+        writer = writers.S3ConfigWriter(
             bucket=config('AWS_S3_BUCKET'),
             model_prefix=args.model_prefix,
             aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
             aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
 
     elif args.cloud_provider.lower() == 'gke':
-        writer = GCSConfigWriter(
+        writer = writers.GCSConfigWriter(
             bucket=config('GCLOUD_STORAGE_BUCKET'),
             model_prefix=args.model_prefix)
 
@@ -114,3 +138,33 @@ if __name__ == '__main__':
 
     # Write the config file
     writer.write(args.file_path)
+
+
+def write_monitoring_config_file(args):
+    writer = writers.MonitoringConfigWriter(
+        monitoring_enabled=args.monitoring_enabled,
+        monitoring_path=args.monitoring_path)
+
+    writer.write(args.monitoring_file_path)
+
+
+def write_batching_config_file(args):
+    writer = writers.BatchConfigWriter(
+        max_batch_size=args.max_batch_size,
+        batch_timeout=args.batch_timeout,
+        max_enqueued_batches=args.max_enqueued_batches)
+
+    writer.write(args.batch_file_path)
+
+
+if __name__ == '__main__':
+    initialize_logger(config('LOG_LEVEL', default='DEBUG'))
+
+    # Get command line arguments
+    ARGS = get_arg_parser().parse_args()
+
+    write_model_config_file(ARGS)
+
+    write_monitoring_config_file(ARGS)
+
+    write_batching_config_file(ARGS)
