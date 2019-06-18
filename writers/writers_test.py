@@ -60,12 +60,127 @@ def tempdir():
         yield dirpath
 
 
-class TestTFServingConfigWriter(object):
+class TestConfigWriter(object):
+
+    def basic_test(self):
+        writer = writers.ConfigWriter()
+        assert hasattr(writer, 'write')
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'base.conf')
+            with pytest.raises(NotImplementedError):
+                writer.write(path)
+
+
+class TestMonitoringConfigWriter(object):
+
+    def test_write(self):
+        enabled_options = [True, False]
+        monitoring_paths = ['/monitoring/prometheus/metrics', '/other/path']
+
+        for enabled, monitoring_path in zip(enabled_options, monitoring_paths):
+
+            writer = writers.MonitoringConfigWriter(enabled, monitoring_path)
+
+            with tempdir() as dirpath:
+                path = os.path.join(dirpath, 'monitoring.conf')
+                writer.write(path)
+
+                # test existence
+                assert os.path.exists(path)
+                assert os.path.isfile(path)
+
+                # test correctness
+                with open(path) as f:
+                    content = f.readlines()
+                    assert len(content) == 4
+                    assert content[0] == 'prometheus_config: {\n'
+                    assert content[1] == '  enable: {},\n'.format(
+                        str(enabled).lower())
+                    assert content[2] == '  path: "{}"\n'.format(
+                        monitoring_path)
+                    assert content[3] == '}\n'
+
+
+class TestBatchConfigWriter(object):
+
+    def test_bad_inputs(self):
+        # test wrong value types for each parameter
+        # str instead of number yields ValueErrr
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size='two',
+                batch_timeout=0,
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout='zero',
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout=0,
+                max_enqueued_batches='one')
+
+        # test numeric values that are out of bounds.
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=-2,  # must be non-negative
+                batch_timeout=1,
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout=-1,  # must be non-negative
+                max_enqueued_batches=1)
+
+        with pytest.raises(ValueError):
+            writer = writers.BatchConfigWriter(
+                max_batch_size=2,
+                batch_timeout=1,
+                max_enqueued_batches=-1)  # must be non-negative
+
+    def test_write(self):
+        writer = writers.BatchConfigWriter(
+            max_batch_size='1',
+            batch_timeout='3000000',
+            max_enqueued_batches=5)
+
+        with tempdir() as dirpath:
+            path = os.path.join(dirpath, 'batch.conf')
+            writer.write(path)
+
+            # test existence
+            assert os.path.exists(path)
+            assert os.path.isfile(path)
+
+            # test correctness
+            with open(path) as f:
+                content = ''.join(f.readlines())
+                required = [
+                    'max_batch_size {',
+                    'value: {}'.format(writer.max_batch_size),
+                    'batch_timeout_micros {',
+                    'value: {}'.format(writer.batch_timeout),
+                    'max_batch_size {',
+                    'value: {}'.format(writer.max_batch_size),
+                    'max_enqueued_batches {',
+                    'value: {}'.format(writer.max_enqueued_batches),
+                    'num_batch_threads {'
+                ]
+                for x in required:
+                    assert x in content
+
+
+class TestModelConfigWriter(object):
 
     def _get_writer(self):
         bucket = 'test-bucket'
         prefix = 'models'
-        return writers.TFServingConfigWriter(bucket, prefix, protocol='test')
+        return writers.ModelConfigWriter(bucket, prefix, protocol='test')
 
     def test_get_model_url(self):
         writer = self._get_writer()

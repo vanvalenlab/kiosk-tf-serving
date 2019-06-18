@@ -29,23 +29,125 @@ from __future__ import division
 from __future__ import print_function
 
 import logging
+import multiprocessing
 
 
-class TFServingConfigWriter(object):
-    """Abstract Class for ConfigWriter
+class ConfigWriter(object):  # pylint: disable=useless-object-inheritance
+    """Base class for all Writers, must have a write() function."""
+
+    def __init__(self):
+        self.logger = logging.getLogger(str(self.__class__.__name__))
+
+    def write(self, path):
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
+        """
+        raise NotImplementedError
+
+
+class MonitoringConfigWriter(ConfigWriter):
+    """Writes a monitoring config file.
+
+    Args:
+        monitoring_enabled: boolean, whether to enable prometheus monitoring
+        monitoring_path: str, API endpoint to register prometheus monitoring
+    """
+
+    def __init__(self,
+                 monitoring_enabled=True,
+                 monitoring_path='/monitoring/prometheus/metrics'):
+        self.monitoring_enabled = monitoring_enabled
+        self.monitoring_path = str(monitoring_path)
+        super(MonitoringConfigWriter, self).__init__()
+
+    def write(self, path):
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
+        """
+        enabled = 'true' if self.monitoring_enabled else 'false'
+        self.logger.debug('Writing monitoring config file to %s', path)
+        with open(path, 'w+') as config_file:
+
+            config_file.write('prometheus_config: {\n')
+            config_file.write('  enable: {},\n'.format(enabled))
+            config_file.write('  path: "{}"\n'.format(self.monitoring_path))
+            config_file.write('}\n')
+
+
+class BatchConfigWriter(ConfigWriter):
+    """Writes a batching config file.
+
+    Args:
+        max_batch_size: int, number of work items in a batch
+        batch_timeout: int, request timeout per batch, in microseconds
+        max_enqueued_batches: int, max number of batches to keep in queue
+    """
+
+    def __init__(self, max_batch_size, batch_timeout, max_enqueued_batches):
+        self.max_batch_size = int(max_batch_size)
+        self.batch_timeout = int(batch_timeout)
+        self.max_enqueued_batches = int(max_enqueued_batches)
+
+        if self.max_batch_size <= 0:
+            raise ValueError('`max_batch_size` must be a positive integer. '
+                             'Got {}.'.format(self.max_batch_size))
+
+        if self.batch_timeout < 0:
+            raise ValueError('`batch_timeout` must be a non-negative number. '
+                             'Got {}.'.format(self.batch_timeout))
+
+        if self.max_enqueued_batches < 0:
+            raise ValueError('`max_enqueued_batches` must be a non-negative '
+                             'integer. Got {}.'.format(max_enqueued_batches))
+
+        self.num_batch_threads = multiprocessing.cpu_count()
+        super(BatchConfigWriter, self).__init__()
+
+    def write(self, path):
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
+        """
+        self.logger.debug('Writing batch config file to %s', path)
+        with open(path, 'w+') as config_file:
+            config_file.write('max_batch_size {\n')
+            config_file.write(' value: {}\n'.format(self.max_batch_size))
+            config_file.write('}\n')
+
+            config_file.write('batch_timeout_micros {\n')
+            config_file.write(' value: {}\n'.format(self.batch_timeout))
+            config_file.write('}\n')
+
+            config_file.write('max_enqueued_batches {\n')
+            config_file.write(' value: {}\n'.format(self.max_enqueued_batches))
+            config_file.write('}\n')
+
+            config_file.write('num_batch_threads {\n')
+            config_file.write(' value: {}\n'.format(self.num_batch_threads))
+            config_file.write('}\n')
+
+
+class ModelConfigWriter(ConfigWriter):
+    """Abstract Class for ModelConfigWriter
     Reads all servable models from a cloud bucket
-    and writes them in a config file for TensorFlow Serving
+    and writes them in a config file for TensorFlow Serving.
     """
 
     def __init__(self, bucket, model_prefix, protocol=None):
         self._storage_protocol = protocol
         self.bucket = bucket
         self.model_prefix = model_prefix
-        self.logger = logging.getLogger(str(self.__class__.__name__))
 
         # Normalize model prefix
         if not self.model_prefix.endswith('/'):
             self.model_prefix = self.model_prefix + '/'
+
+        super(ModelConfigWriter, self).__init__()
 
     def get_model_url(self, model):
         """Get the URL of the model in the given cloud bucket
@@ -83,9 +185,10 @@ class TFServingConfigWriter(object):
         self.logger.debug('Found Models: %s', ', '.join(models))
 
     def write(self, path):
-        """Create config file and write config block for each model
-        # Arguments:
-            models: list of models to register with tf-serving
+        """Create batch config file and save to `path`.
+
+        Args:
+            path: str, the filepath of the config file to write.
         """
         self.logger.debug('Writing model config file to %s', path)
         with open(path, 'w+') as config_file:
@@ -121,7 +224,7 @@ class TFServingConfigWriter(object):
         raise NotImplementedError
 
 
-class S3ConfigWriter(TFServingConfigWriter):
+class S3ConfigWriter(ModelConfigWriter):
 
     def __init__(self,
                  bucket,
@@ -148,7 +251,7 @@ class S3ConfigWriter(TFServingConfigWriter):
             yield model
 
 
-class GCSConfigWriter(TFServingConfigWriter):
+class GCSConfigWriter(ModelConfigWriter):
 
     def __init__(self, bucket, model_prefix):
         from google.cloud import storage

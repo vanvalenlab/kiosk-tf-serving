@@ -30,6 +30,8 @@ from __future__ import print_function
 
 from writers.writers import S3ConfigWriter
 from writers.writers import GCSConfigWriter
+from writers.writers import MonitoringConfigWriter
+from writers.writers import BatchConfigWriter
 
 del absolute_import
 del division
