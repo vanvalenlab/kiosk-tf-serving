@@ -25,7 +25,7 @@
 # ============================================================================
 
 # Using official tensorflow-serving as base image
-ARG TF_SERVING_VERSION=1.11.1
+ARG TF_SERVING_VERSION=1.14.0
 ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
 
 FROM ${TF_SERVING_BUILD_IMAGE}
