@@ -32,3 +32,27 @@ NV_GPU='0' nvidia-docker run -it \
     -p 8501:8501 \
     $(whoami)/kiosk-tf-serving:latest
 ```
+
+## Environmental Variables
+
+The `kiosk-tf-serving` can be configured using environmental variables in a `.env` file.
+
+| Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `GCLOUD_STORAGE_BUCKET` | **REQUIRED**: Cloud storage bucket address (e.g. `"gs://bucket-name"`). | `""` |
+| `PORT` | Port to listen on for gRPC API. | `8500` |
+| `REST_API_PORT` | Port to listen on for HTTP/REST API. | `8501` |
+| `REST_API_TIMEOUT` | Timeout in ms for HTTP/REST API calls. | `30000` |
+| `GRPC_CHANNEL_ARGS` | Optional channel args for the gRPC API | `""` |
+| `CLOUD_PROVIDER` | The cloud provider hosting the DeepCell Kiosk. | `"gke"` |
+| `MODEL_PREFIX` | Prefix of model directory in the cloud storage bucket. | `"/models"` |
+| `MODEL_CONFIG_FILE` | Path of the model configuration file written by `write_config_file.py`. | `"/kiosk/tf-serving/models.conf"` |
+| `ENABLE_BATCHING` | Whether to enable batching in TensorFlow Serving. | `true` |
+| `MAX_BATCH_SIZE` | Maximum number of items in a batch. | `1` |
+| `MAX_ENQUEUED_BATCHES` | Number of jobs to keep in queue to be processed. Jobs may take a long time if this value is too high. | `128` |
+| `BATCH_TIMEOUT_MICROS` | The maximum amount of time in ms to wait before executing a batch. | `0` |
+| `BATCHING_CONFIG_FILE` | Path of the batching configuration file created by `write_config_file.py`. | `"/kiosk/tf-serving/batching_config.txt"` |
+| `PROMETHEUS_MONITORING_ENABLED` |  If `true`, a monitoring configuration file is written. | `true` |
+| `PROMETHEUS_MONITORING_PATH` |  Prometheus scraping endpoint used if `PROMETHEUS_MONITORING_ENABLED`. | `"/monitoring/prometheus/metrics"` |
+| `MONITORING_CONFIG_FILE` |  Path of the monitoring configuration file. | `"/kiosk/tf-serving/monitoring_config.txt"` |
+| `TF_CPP_MIN_LOG_LEVEL` | The log level of TensorFlow Serving. | `0` |
