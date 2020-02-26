@@ -119,22 +119,21 @@ def get_arg_parser():
 
 def write_model_config_file(args):
     # Create the ConfigWriter based on the cloud provider
-    if args.cloud_provider.lower() == 'aws':
-        writer = writers.S3ConfigWriter(
-            bucket=config('STORAGE_BUCKET'),
-            model_prefix=args.model_prefix,
-            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
+    bucket = config('STORAGE_BUCKET')
+    writer_cls = writers.get_model_config_writer(bucket)
 
-    elif args.cloud_provider.lower() == 'gke':
-        writer = writers.GCSConfigWriter(
-            bucket=config('STORAGE_BUCKET'),
-            model_prefix=args.model_prefix)
+    writer_kwargs = {
+        'bucket': bucket,
+        'model_prefix': args.model_prefix,
 
-    else:
-        raise ValueError('Expected `cloud_provider` to be one of'
-                         ' ["aws", "gke"].  Got {}'.format(
-                             args.cloud_provider))
+    }
+
+    # additional AWS required credentials
+    if isinstance(writer_cls, writers.S3ConfigWriter):
+        writer_kwargs['aws_access_key_id'] = config('AWS_ACCESS_KEY_ID')
+        writer_kwargs['aws_secret_access_key'] = config('AWS_SECRET_ACCESS_KEY')
+
+    writer = writer_cls(**writer_kwargs)
 
     # Write the config file
     writer.write(args.file_path)

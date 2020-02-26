@@ -33,6 +33,28 @@ from writers.writers import GCSConfigWriter
 from writers.writers import MonitoringConfigWriter
 from writers.writers import BatchConfigWriter
 
+
+def get_model_config_writer(bucket):
+    """Based on the bucket address, return the appropriate ConfigWriter class.
+
+    Args:
+        bucket (str): Path of the storage bucket to use.
+
+    Returns:
+        ModelConfigWriter: Class to read the bucket and create a model config.
+    """
+    b = str(bucket).lower()
+    if b.startswith('s3://'):
+        return S3ConfigWriter
+
+    if b.startswith('gs://'):
+        return GCSConfigWriter
+
+    protocol = b.split('://')[0]
+    raise ValueError('Unknown bucket protocol "{}" in bucket "{}"'.format(
+        protocol, b))
+
+
 del absolute_import
 del division
 del print_function
