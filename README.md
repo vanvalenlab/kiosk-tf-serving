@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/vanvalenlab/kiosk-tf-serving.svg?branch=master)](https://travis-ci.org/vanvalenlab/kiosk-tf-serving)
 [![Coverage Status](https://coveralls.io/repos/github/vanvalenlab/kiosk-tf-serving/badge.svg?branch=master)](https://coveralls.io/github/vanvalenlab/kiosk-tf-serving?branch=master)
 
-TensorFlow-Serving configuration files automatically generated based on the contents of a storage bucket.  `write_config_file.py` will automatically read the contents of the storage bucket and write a configuration file for tensorflow-serving.
+`kiosk-tf-serving` uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to serve deep learning models over gRPC API and REST API. A configuration file is automatically created on startup which allows any model found in a storage bucket to be served.
 
 TensorFlow serving will host all versions of all models in the bucket via RPC API and REST API.
 
