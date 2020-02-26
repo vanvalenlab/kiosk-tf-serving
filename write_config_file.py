@@ -121,14 +121,14 @@ def write_model_config_file(args):
     # Create the ConfigWriter based on the cloud provider
     if args.cloud_provider.lower() == 'aws':
         writer = writers.S3ConfigWriter(
-            bucket=config('AWS_S3_BUCKET'),
+            bucket=config('STORAGE_BUCKET'),
             model_prefix=args.model_prefix,
             aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
             aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
 
     elif args.cloud_provider.lower() == 'gke':
         writer = writers.GCSConfigWriter(
-            bucket=config('GCLOUD_STORAGE_BUCKET'),
+            bucket=config('STORAGE_BUCKET'),
             model_prefix=args.model_prefix)
 
     else:
