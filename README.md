@@ -24,7 +24,6 @@ NV_GPU='0' nvidia-docker run -it \
     -e PORT=8500 \
     -e REST_API_PORT=8501 \
     -e REST_API_TIMEOUT=30000 \
-    -e CLOUD_PROVIDER=aws \
     -e AWS_S3_BUCKET=YOUR_BUCKET_NAME \
     -e AWS_ACCESS_KEY_ID=YOUR_KEY_ID \
     -e AWS_SECRET_ACCESS_KEY=YOUR_SECRET_KEY \

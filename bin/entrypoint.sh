@@ -2,7 +2,6 @@
 
 # write the configuration files, then run the server
 python write_config_file.py \
-    --cloud-provider=$CLOUD_PROVIDER \
     --model-prefix=$MODEL_PREFIX \
     --file-path=$MODEL_CONFIG_FILE \
     --monitoring-enabled=$PROMETHEUS_MONITORING_ENABLED \
