@@ -22,14 +22,9 @@ NV_GPU='0' nvidia-docker run -it \
     --runtime=nvidia \
     -e MODEL_PREFIX=models \
     -e PORT=8500 \
-    -e REST_API_PORT=8501 \
-    -e REST_API_TIMEOUT=30000 \
-    -e CLOUD_PROVIDER=aws \
-    -e AWS_S3_BUCKET=YOUR_BUCKET_NAME \
-    -e AWS_ACCESS_KEY_ID=YOUR_KEY_ID \
-    -e AWS_SECRET_ACCESS_KEY=YOUR_SECRET_KEY \
+    -e CLOUD_PROVIDER=gke \
+    -e GCLOUD_STORAGE_BUCKET=YOUR_BUCKET_NAME \
     -p 8500:8500 \
-    -p 8501:8501 \
     $(whoami)/kiosk-tf-serving:latest
 ```
 
