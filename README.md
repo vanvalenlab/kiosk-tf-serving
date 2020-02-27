@@ -26,6 +26,7 @@ NV_GPU='0' nvidia-docker run -it \
     -e CLOUD_PROVIDER=gke \
     -e GCLOUD_STORAGE_BUCKET=YOUR_BUCKET_NAME \
     -p 8500:8500 \
+    -p 8501:8501 \
     $(whoami)/kiosk-tf-serving:latest
 ```
 
