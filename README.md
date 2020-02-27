@@ -41,7 +41,7 @@ The `kiosk-tf-serving` can be configured using environmental variables in a `.en
 | `PORT` | Port to listen on for gRPC API. | `8500` |
 | `REST_API_PORT` | Port to listen on for HTTP/REST API. | `8501` |
 | `REST_API_TIMEOUT` | Timeout in ms for HTTP/REST API calls. | `30000` |
-| `GRPC_CHANNEL_ARGS` | Optional channel args for the gRPC API | `""` |
+| `GRPC_CHANNEL_ARGS` | Optional channel args for the gRPC API. | `""` |
 | `MODEL_PREFIX` | Prefix of model directory in the cloud storage bucket. | `"/models"` |
 | `MODEL_CONFIG_FILE` | Path of the model configuration file written by `write_config_file.py`. | `"/kiosk/tf-serving/models.conf"` |
 | `ENABLE_BATCHING` | Whether to enable batching in TensorFlow Serving. | `true` |
@@ -51,5 +51,5 @@ The `kiosk-tf-serving` can be configured using environmental variables in a `.en
 | `BATCHING_CONFIG_FILE` | Path of the batching configuration file created by `write_config_file.py`. | `"/kiosk/tf-serving/batching_config.txt"` |
 | `PROMETHEUS_MONITORING_ENABLED` |  If `true`, a monitoring configuration file is written. | `true` |
 | `PROMETHEUS_MONITORING_PATH` |  Prometheus scraping endpoint used if `PROMETHEUS_MONITORING_ENABLED`. | `"/monitoring/prometheus/metrics"` |
-| `MONITORING_CONFIG_FILE` |  Path of the monitoring configuration file. | `"/kiosk/tf-serving/monitoring_config.txt"` |
+| `MONITORING_CONFIG_FILE` |  Path of the monitoring configuration file created by `write_config_file.py`. | `"/kiosk/tf-serving/monitoring_config.txt"` |
 | `TF_CPP_MIN_LOG_LEVEL` | The log level of TensorFlow Serving. | `0` |
