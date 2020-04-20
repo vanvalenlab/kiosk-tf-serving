@@ -1,12 +1,12 @@
-# kiosk-tf-serving
+# ![DeepCell Kiosk Banner](https://raw.githubusercontent.com/vanvalenlab/kiosk-console/master/docs/images/DeepCell_Kiosk_Banner.png)
 
 [![Build Status](https://travis-ci.org/vanvalenlab/kiosk-tf-serving.svg?branch=master)](https://travis-ci.org/vanvalenlab/kiosk-tf-serving)
 [![Coverage Status](https://coveralls.io/repos/github/vanvalenlab/kiosk-tf-serving/badge.svg?branch=master)](https://coveralls.io/github/vanvalenlab/kiosk-tf-serving?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](/LICENSE)
 
-`kiosk-tf-serving` uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to serve deep learning models over gRPC API and REST API. A configuration file is automatically created on startup which allows any model found in a (AWS or GCS) storage bucket to be served.
+`kiosk-tf-serving` uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to serve deep learning models over gRPC and REST APIs. A configuration file is automatically created on startup which allows any model found in a (AWS or GCS) storage bucket to be served.
 
-TensorFlow serving will host all versions of all models in the bucket via RPC API and REST API.
+TensorFlow serving will host all versions of all models in the bucket via RPC and REST APIs.
 
 This repository is part of the [DeepCell Kiosk](https://github.com/vanvalenlab/kiosk-console). More information about the Kiosk project is available through [Read the Docs](https://deepcell-kiosk.readthedocs.io/en/master) and our [FAQ](http://www.deepcell.org/faq) page.
 
