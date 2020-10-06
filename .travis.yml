@@ -40,7 +40,7 @@ jobs:
       python: 3.7
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker build -t "$TRAVIS_REPO_SLUG" -f docker/Dockerfile.serving .
+      - docker build -t "$TRAVIS_REPO_SLUG" -f docker/Dockerfile.server .
       - docker images
       - docker tag "$TRAVIS_REPO_SLUG" "$TRAVIS_REPO_SLUG":latest
       - docker tag "$TRAVIS_REPO_SLUG" "$TRAVIS_REPO_SLUG":"${TRAVIS_TAG}"
