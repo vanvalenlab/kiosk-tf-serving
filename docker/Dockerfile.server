@@ -24,13 +24,7 @@
 # limitations under the License.
 # ============================================================================
 
-# Using official tensorflow-serving as base image
-ARG TF_SERVING_VERSION=1.15.0
-ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
-
-FROM ${TF_SERVING_BUILD_IMAGE}
-
-WORKDIR /kiosk/tf-serving
+FROM tensorflow/serving:1.15.0-gpu
 
 ENV PORT=8500 \
     REST_API_PORT=8501 \
@@ -40,20 +34,10 @@ ENV PORT=8500 \
     AWS_LOG_LEVEL=3 \
     GRPC_CHANNEL_ARGS="" \
     TF_SESSION_PARALLELISM=0 \
-    PROMETHEUS_MONITORING_ENABLED=true \
-    PROMETHEUS_MONITORING_PATH=/monitoring/prometheus/metrics \
-    MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf \
-    BATCHING_CONFIG_FILE=/kiosk/tf-serving/batching_config.txt \
-    MONITORING_CONFIG_FILE=/kiosk/tf-serving/monitoring_config.txt \
-    MAX_BATCH_SIZE=1 \
-    BATCH_TIMEOUT_MICROS=0 \
-    MAX_ENQUEUED_BATCHES=128
+    MODEL_CONFIG_FILE=/config/models.conf \
+    BATCHING_CONFIG_FILE=/config/batching_config.txt \
+    MONITORING_CONFIG_FILE=/config/monitoring_config.txt
 
-# Copy requirements.txt and install python dependencies
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY ./bin/serve.sh /usr/local/bin/entrypoint.sh
 
-# Copy python script to generate model configuration file
-COPY . .
-
-ENTRYPOINT "./bin/entrypoint.sh"
+ENTRYPOINT "/usr/local/bin/entrypoint.sh"
