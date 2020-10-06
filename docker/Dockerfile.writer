@@ -24,22 +24,12 @@
 # limitations under the License.
 # ============================================================================
 
-# Using official tensorflow-serving as base image
-ARG TF_SERVING_VERSION=1.15.0
-ARG TF_SERVING_BUILD_IMAGE=tensorflow/serving:${TF_SERVING_VERSION}-devel-gpu
+FROM python:3.7-slim-buster
 
-FROM ${TF_SERVING_BUILD_IMAGE}
+WORKDIR /usr/src/app
 
-WORKDIR /kiosk/tf-serving
-
-ENV PORT=8500 \
-    REST_API_PORT=8501 \
-    REST_API_TIMEOUT=30000 \
-    ENABLE_BATCHING=true \
-    TF_CPP_MIN_LOG_LEVEL=0 \
-    AWS_LOG_LEVEL=3 \
-    GRPC_CHANNEL_ARGS="" \
-    TF_SESSION_PARALLELISM=0 \
+ENV CLOUD_PROVIDER=aws \
+    MODEL_PREFIX=models \
     PROMETHEUS_MONITORING_ENABLED=true \
     PROMETHEUS_MONITORING_PATH=/monitoring/prometheus/metrics \
     MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf \
@@ -54,6 +44,8 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 # Copy python script to generate model configuration file
-COPY . .
+COPY writers write_config_file.py /usr/src/app/
 
-ENTRYPOINT "./bin/entrypoint.sh"
+COPY ./bin/write.sh /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT "/usr/local/bin/entrypoint.sh"
