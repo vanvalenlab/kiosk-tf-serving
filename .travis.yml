@@ -11,6 +11,7 @@ python:
   - 3.5
   - 3.6
   - 3.7
+  - 3.8
 
 cache: pip
 
@@ -23,12 +24,23 @@ script:
 
 jobs:
   include:
-    - stage: deploy
+    - stage: deploy_writer
       if: tag IS present
-      python: 3.6
+      python: 3.7
+      script:
+      - export IMAGE_NAME="${TRAVIS_REPO_SLUG}-config-writer"
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker build -t "$IMAGE_NAME" -f docker/Dockerfile.writer .
+      - docker images
+      - docker tag "$IMAGE_NAME" "$IMAGE_NAME":latest
+      - docker tag "$IMAGE_NAME" "$IMAGE_NAME":"${TRAVIS_TAG}"
+      - docker push "$IMAGE_NAME"
+    - stage: deploy_server
+      if: tag IS present
+      python: 3.7
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker build -t "$TRAVIS_REPO_SLUG" .
+      - docker build -t "$TRAVIS_REPO_SLUG" -f docker/Dockerfile.serving .
       - docker images
       - docker tag "$TRAVIS_REPO_SLUG" "$TRAVIS_REPO_SLUG":latest
       - docker tag "$TRAVIS_REPO_SLUG" "$TRAVIS_REPO_SLUG":"${TRAVIS_TAG}"
