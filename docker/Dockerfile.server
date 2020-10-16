@@ -23,38 +23,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Module for writing TensorFlow Serving config files"""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
-from writers.writers import S3ConfigWriter
-from writers.writers import GCSConfigWriter
-from writers.writers import MonitoringConfigWriter
-from writers.writers import BatchConfigWriter
+FROM tensorflow/serving:1.15.0-gpu
 
+ENV PORT=8500 \
+    REST_API_PORT=8501 \
+    REST_API_TIMEOUT=30000 \
+    ENABLE_BATCHING=true \
+    PROMETHEUS_MONITORING_ENABLED=true \
+    TF_CPP_MIN_LOG_LEVEL=0 \
+    AWS_LOG_LEVEL=3 \
+    GRPC_CHANNEL_ARGS="" \
+    TF_SESSION_PARALLELISM=0 \
+    MODEL_CONFIG_FILE=/config/models.conf \
+    BATCHING_CONFIG_FILE=/config/batching_config.txt \
+    MONITORING_CONFIG_FILE=/config/monitoring_config.txt
 
-def get_model_config_writer(bucket):
-    """Based on the bucket address, return the appropriate ConfigWriter class.
+COPY ./bin/serve.sh /usr/local/bin/entrypoint.sh
 
-    Args:
-        bucket (str): Path of the storage bucket to use.
-
-    Returns:
-        ModelConfigWriter: Class to read the bucket and create a model config.
-    """
-    b = str(bucket).lower()
-    if b.startswith('s3://'):
-        return S3ConfigWriter
-
-    if b.startswith('gs://'):
-        return GCSConfigWriter
-
-    protocol = b.split('://')[0]
-    raise ValueError('Unknown bucket protocol "{}" in bucket "{}"'.format(
-        protocol, b))
-
-
-del absolute_import
-del division
-del print_function
+ENTRYPOINT "/usr/local/bin/entrypoint.sh"
