@@ -39,7 +39,6 @@ The `kiosk-tf-serving` can be configured using environmental variables in a `.en
 | Name | Description | Default Value |
 | :--- | :--- | :--- |
 | `STORAGE_BUCKET` | **REQUIRED**: Cloud storage bucket address (e.g. `"gs://bucket-name"`). | `""` |
-| `CLOUD_PROVIDER` | **REQUIRED**: The cloud provider hosting the DeepCell Kiosk. | `"gke"` |
 | `PORT` | Port to listen on for gRPC API. | `8500` |
 | `REST_API_PORT` | Port to listen on for HTTP/REST API. | `8501` |
 | `REST_API_TIMEOUT` | Timeout in ms for HTTP/REST API calls. | `30000` |
