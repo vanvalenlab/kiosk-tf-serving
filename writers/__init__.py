@@ -34,7 +34,6 @@ from writers.writers import MonitoringConfigWriter
 from writers.writers import BatchConfigWriter
 from writers.writers import get_model_config_writer
 
-
 del absolute_import
 del division
 del print_function
