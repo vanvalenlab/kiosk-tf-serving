@@ -31,6 +31,9 @@ from __future__ import print_function
 import logging
 import multiprocessing
 
+import boto3
+from google.cloud import storage
+
 
 class ConfigWriter(object):  # pylint: disable=useless-object-inheritance
     """Base class for all Writers, must have a write() function."""
@@ -231,7 +234,6 @@ class S3ConfigWriter(ModelConfigWriter):
                  model_prefix,
                  aws_access_key_id,
                  aws_secret_access_key):
-        import boto3
         self.client = boto3.client(
             's3',
             aws_access_key_id=aws_access_key_id,
@@ -254,7 +256,6 @@ class S3ConfigWriter(ModelConfigWriter):
 class GCSConfigWriter(ModelConfigWriter):
 
     def __init__(self, bucket, model_prefix):
-        from google.cloud import storage
         self.client = storage.Client()
         super(GCSConfigWriter, self).__init__(bucket, model_prefix, 'gs')
 

@@ -1,4 +1,5 @@
 pytest<6
 pytest-cov
+pytest-mock
 pytest-pep8
 coveralls
