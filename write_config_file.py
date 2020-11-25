@@ -126,7 +126,7 @@ def write_model_config_file(args):
     writer_cls = writers.get_model_config_writer(args.storage_bucket)
 
     writerkwargs = {
-        'bucket': bucket.split('://')[-1],
+        'bucket': str(args.storage_bucket).split('://')[-1],
         'model_prefix': args.model_prefix,
     }
 
