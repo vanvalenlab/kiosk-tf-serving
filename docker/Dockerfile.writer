@@ -28,8 +28,7 @@ FROM python:3.7-slim-buster
 
 WORKDIR /usr/src/app
 
-ENV CLOUD_PROVIDER=aws \
-    MODEL_PREFIX=models \
+ENV MODEL_PREFIX=models \
     PROMETHEUS_MONITORING_ENABLED=true \
     PROMETHEUS_MONITORING_PATH=/monitoring/prometheus/metrics \
     MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf \
