@@ -28,7 +28,8 @@ FROM python:3.7-slim-buster
 
 WORKDIR /usr/src/app
 
-ENV MODEL_PREFIX=models \
+ENV STORAGE_BUCKET=gs://deepcell-models \
+    MODEL_PREFIX=models \
     PROMETHEUS_MONITORING_ENABLED=true \
     PROMETHEUS_MONITORING_PATH=/monitoring/prometheus/metrics \
     MODEL_CONFIG_FILE=/kiosk/tf-serving/models.conf \
