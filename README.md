@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/vanvalenlab/kiosk-tf-serving/badge.svg?branch=master)](https://coveralls.io/github/vanvalenlab/kiosk-tf-serving?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](/LICENSE)
 
-`kiosk-tf-serving` uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to serve deep learning models over gRPC and REST APIs. A configuration file is automatically created on startup which allows any model found in a (AWS or GCS) storage bucket to be served.
+`kiosk-tf-serving` uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to serve deep learning models over gRPC and REST APIs. A configuration file can be automatically created using `python write_config_file.py` to allow any model found in a (AWS or GCS) storage bucket to be served.
 
 TensorFlow serving will host all versions of all models in the bucket via RPC and REST APIs.
 
@@ -12,21 +12,23 @@ This repository is part of the [DeepCell Kiosk](https://github.com/vanvalenlab/k
 
 ## Docker
 
-Compile the docker container by running
+Build the docker image by running
 
 ```bash
-docker build --pull -t $(whoami)/kiosk-tf-serving .
+docker build --pull -t $(whoami)/kiosk-tf-serving -f docker/Dockerfile.server .
 ```
 
-Run the docker container by running
+Run the docker image by running
 
 ```bash
-NV_GPU='0' nvidia-docker run -it \
-    --runtime=nvidia \
+# write the configuration files for a given bucket
+python write_config_model.py --storage-bucket=$STORAGE_BUCKET
+
+# mount the config files and run the image
+docker run --gpus=1 -it \
+    -v $PWD:/config \
     -e PORT=8500 \
     -e REST_API_PORT=8501 \
-    -e STORAGE_BUCKET=YOUR_BUCKET_NAME \
-    -e MODEL_PREFIX=models \
     -p 8500:8500 \
     -p 8501:8501 \
     $(whoami)/kiosk-tf-serving:latest
