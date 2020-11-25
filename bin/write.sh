@@ -2,6 +2,7 @@
 
 # write the configuration files before running the server
 python write_config_file.py \
+    --storage-bucket=$STORAGE_BUCKET \
     --model-prefix=$MODEL_PREFIX \
     --file-path=$MODEL_CONFIG_FILE \
     --monitoring-enabled=$PROMETHEUS_MONITORING_ENABLED \

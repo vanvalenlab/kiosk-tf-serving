@@ -85,6 +85,10 @@ def get_arg_parser():
                         default=os.path.join(root_dir, 'models.conf'),
                         help='Full filepath of configuration file')
 
+    parser.add_argument('-b', '--storage-bucket', required=True,
+                        help='Cloud Storage Bucket '
+                             '(e.g. gs://deepcell-models)')
+
     # Batch Config Args
     parser.add_argument('--enable-batching', type=bool, default=True,
                         help='Boolean switch for batching configuration.')
@@ -119,11 +123,10 @@ def get_arg_parser():
 
 def write_model_config_file(args):
     # Create the ConfigWriter based on the cloud provider
-    bucket = config('STORAGE_BUCKET')
-    writer_cls = writers.get_model_config_writer(bucket)
+    writer_cls = writers.get_model_config_writer(args.storage_bucket)
 
     writerkwargs = {
-        'bucket': bucket,
+        'bucket': bucket.split('://')[-1],
         'model_prefix': args.model_prefix,
     }
 
