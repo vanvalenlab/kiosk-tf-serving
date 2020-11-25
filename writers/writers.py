@@ -268,3 +268,24 @@ class GCSConfigWriter(ModelConfigWriter):
         blobs = (b.name for b in bucket.list_blobs(prefix=self.model_prefix))
         for model in self._filter_models(blobs):
             yield model
+
+
+def get_model_config_writer(bucket):
+    """Based on the bucket address, return the appropriate ConfigWriter class.
+
+    Args:
+        bucket (str): Path of the storage bucket to use.
+
+    Returns:
+        ModelConfigWriter: Class to read the bucket and create a model config.
+    """
+    b = str(bucket).lower()
+    if b.startswith('s3://'):
+        return S3ConfigWriter
+
+    if b.startswith('gs://'):
+        return GCSConfigWriter
+
+    protocol = b.split('://')[0]
+    raise ValueError('Unknown bucket protocol "{}" in bucket "{}"'.format(
+        protocol, b))

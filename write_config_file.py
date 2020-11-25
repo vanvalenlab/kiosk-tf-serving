@@ -74,8 +74,8 @@ def get_arg_parser():
     # Model Config args
     parser.add_argument('-c', '--cloud-provider',
                         choices=['aws', 'gke'],
-                        required=True,
-                        help='Cloud Provider')
+                        required=False,
+                        help='DEPRECATED: Cloud Provider')
 
     parser.add_argument('-p', '--model-prefix',
                         default='/',
@@ -84,6 +84,10 @@ def get_arg_parser():
     parser.add_argument('-f', '--file-path',
                         default=os.path.join(root_dir, 'models.conf'),
                         help='Full filepath of configuration file')
+
+    parser.add_argument('-b', '--storage-bucket', required=True,
+                        help='Cloud Storage Bucket '
+                             '(e.g. gs://deepcell-models)')
 
     # Batch Config Args
     parser.add_argument('--enable-batching', type=bool, default=True,
@@ -119,22 +123,19 @@ def get_arg_parser():
 
 def write_model_config_file(args):
     # Create the ConfigWriter based on the cloud provider
-    if args.cloud_provider.lower() == 'aws':
-        writer = writers.S3ConfigWriter(
-            bucket=config('AWS_S3_BUCKET'),
-            model_prefix=args.model_prefix,
-            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
+    writer_cls = writers.get_model_config_writer(args.storage_bucket)
 
-    elif args.cloud_provider.lower() == 'gke':
-        writer = writers.GCSConfigWriter(
-            bucket=config('GCLOUD_STORAGE_BUCKET'),
-            model_prefix=args.model_prefix)
+    writerkwargs = {
+        'bucket': str(args.storage_bucket).split('://')[-1],
+        'model_prefix': args.model_prefix,
+    }
 
-    else:
-        raise ValueError('Expected `cloud_provider` to be one of'
-                         ' ["aws", "gke"].  Got {}'.format(
-                             args.cloud_provider))
+    # additional AWS required credentials
+    if isinstance(writer_cls, writers.S3ConfigWriter):
+        writerkwargs['aws_access_key_id'] = config('AWS_ACCESS_KEY_ID')
+        writerkwargs['aws_secret_access_key'] = config('AWS_SECRET_ACCESS_KEY')
+
+    writer = writer_cls(**writerkwargs)
 
     # Write the config file
     writer.write(args.file_path)

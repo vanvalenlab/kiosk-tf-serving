@@ -28,7 +28,7 @@ FROM python:3.7-slim-buster
 
 WORKDIR /usr/src/app
 
-ENV CLOUD_PROVIDER=aws \
+ENV STORAGE_BUCKET=gs://deepcell-models \
     MODEL_PREFIX=models \
     PROMETHEUS_MONITORING_ENABLED=true \
     PROMETHEUS_MONITORING_PATH=/monitoring/prometheus/metrics \
@@ -41,7 +41,7 @@ ENV CLOUD_PROVIDER=aws \
 
 # Copy requirements.txt and install python dependencies
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 
 # Copy python script to generate model configuration file
 COPY writers write_config_file.py /usr/src/app/
