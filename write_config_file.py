@@ -71,6 +71,12 @@ def get_arg_parser():
 
     parser = argparse.ArgumentParser()
 
+    # Model Config args
+    parser.add_argument('-c', '--cloud-provider',
+                        choices=['aws', 'gke'],
+                        required=False,
+                        help='DEPRECATED: Cloud Provider')
+
     parser.add_argument('-p', '--model-prefix',
                         default='/',
                         help='Base directory of models')
