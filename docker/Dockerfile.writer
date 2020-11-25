@@ -41,7 +41,7 @@ ENV STORAGE_BUCKET=gs://deepcell-models \
 
 # Copy requirements.txt and install python dependencies
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 
 # Copy python script to generate model configuration file
 COPY writers write_config_file.py /usr/src/app/
