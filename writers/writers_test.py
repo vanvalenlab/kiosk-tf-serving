@@ -36,7 +36,19 @@ import six
 
 import pytest
 
-from writers import writers
+import writers
+
+
+def test_get_model_config_writer():
+    # Test s3:// protocol gets correct class
+    writer_cls = writers.get_model_config_writer('s3://bucket-name/model-path')
+    assert writer_cls is writers.S3ConfigWriter
+
+    writer_cls = writers.get_model_config_writer('gs://bucket-name/model-path')
+    assert writer_cls is writers.GCSConfigWriter
+
+    with pytest.raises(ValueError):
+        writers.get_model_config_writer('abc://bucket-name/model-path')
 
 
 class TestConfigWriter(object):
@@ -160,7 +172,8 @@ class TestModelConfigWriter(object):
     def _get_writer(self):
         bucket = 'test-bucket'
         prefix = 'models'
-        return writers.ModelConfigWriter(bucket, prefix, protocol='test')
+        return writers.writers.ModelConfigWriter(
+            bucket, prefix, protocol='test')
 
     def test_get_model_url(self):
         writer = self._get_writer()
@@ -339,8 +352,7 @@ class TestGSCConfigWriter(object):
         # test correctness
         with open(path) as f:
             content = f.readlines()
-            import warnings
-            warnings.warn('%s' % ''.join(content))
+
             assert content[0] == 'model_config_list: {\n'
             assert len(content) == N * 8 + 2
             clean = lambda x: x.replace(' ', '').replace('\n', '')

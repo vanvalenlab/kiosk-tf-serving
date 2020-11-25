@@ -116,18 +116,17 @@ def write_model_config_file(args):
     bucket = config('STORAGE_BUCKET')
     writer_cls = writers.get_model_config_writer(bucket)
 
-    writer_kwargs = {
+    writerkwargs = {
         'bucket': bucket,
         'model_prefix': args.model_prefix,
-
     }
 
     # additional AWS required credentials
     if isinstance(writer_cls, writers.S3ConfigWriter):
-        writer_kwargs['aws_access_key_id'] = config('AWS_ACCESS_KEY_ID')
-        writer_kwargs['aws_secret_access_key'] = config('AWS_SECRET_ACCESS_KEY')
+        writerkwargs['aws_access_key_id'] = config('AWS_ACCESS_KEY_ID')
+        writerkwargs['aws_secret_access_key'] = config('AWS_SECRET_ACCESS_KEY')
 
-    writer = writer_cls(**writer_kwargs)
+    writer = writer_cls(**writerkwargs)
 
     # Write the config file
     writer.write(args.file_path)
