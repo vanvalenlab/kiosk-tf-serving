@@ -24,7 +24,7 @@
 # limitations under the License.
 # ============================================================================
 
-FROM vanvalenlab/tf-serving:2.5.1-gpu
+FROM tensorflow/serving:2.8.0-gpu
 
 ENV PORT=8500 \
     REST_API_PORT=8501 \
