@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/vanvalenlab/kiosk-tf-serving/workflows/build/badge.svg)](https://github.com/vanvalenlab/kiosk-tf-serving/actions)
 [![Coverage Status](https://coveralls.io/repos/github/vanvalenlab/kiosk-tf-serving/badge.svg?branch=master)](https://coveralls.io/github/vanvalenlab/kiosk-tf-serving?branch=master)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](/LICENSE)
+[![Modified Apache 2.0](https://img.shields.io/badge/license-Modified%20Apache%202-blue)](/LICENSE)
 
 `kiosk-tf-serving` uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to serve deep learning models over gRPC and REST APIs. A configuration file can be automatically created using `python write_config_file.py` to allow any model found in a (AWS or GCS) storage bucket to be served.
 
@@ -67,5 +67,5 @@ This software is license under a modified Apache-2.0 license. See [LICENSE](/LIC
 
 ## Copyright
 
-Copyright © 2018-2021 [The Van Valen Lab](http://www.vanvalen.caltech.edu/) at the California Institute of Technology (Caltech), with support from the Paul Allen Family Foundation, Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
+Copyright © 2018-2022 [The Van Valen Lab](http://www.vanvalen.caltech.edu/) at the California Institute of Technology (Caltech), with support from the Paul Allen Family Foundation, Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
 All rights reserved.
